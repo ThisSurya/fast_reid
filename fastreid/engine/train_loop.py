@@ -247,7 +247,7 @@ class SimpleTrainer(TrainerBase):
         """
         self.optimizer.zero_grad()
 
-        losses.backward()
+        self.grad_scaler.scale(losses).backward()
 
         self._write_metrics(loss_dict, data_time)
 
@@ -255,7 +255,9 @@ class SimpleTrainer(TrainerBase):
         If you need gradient clipping/scaling or other processing, you can
         wrap the optimizer with your custom `step()` method.
         """
-        self.optimizer.step()
+        # self.optimizer.step()
+        self.grad_scaler.step(self.optimizer)
+        self.grad_scaler.update()
         if isinstance(self.param_wrapper, ContiguousParams):
             self.param_wrapper.assert_buffer_is_valid()
 
